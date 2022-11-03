@@ -12,7 +12,6 @@ export const App = () => {
   const [page, setPage] = useState(1);
   const [largeImage, setlargeImage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [_, setError] = useState(null);
 
   useEffect(() => {
     if (imageName === '') return;
@@ -24,7 +23,6 @@ export const App = () => {
         setImages(prev => [...prev, ...hits]);
         setIsLoading(false);
       } catch (error) {
-        setError(error);
         setIsLoading(false);
         console.log(error.message);
       }
