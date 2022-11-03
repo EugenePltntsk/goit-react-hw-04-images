@@ -11,5 +11,5 @@ export function Button({ changePage }) {
 }
 
 Button.propTypes = {
-  chanmgePage: PropTypes.func.isRequired,
+  changePage: PropTypes.func.isRequired,
 };

@@ -1,77 +1,64 @@
 import { searchImages } from 'Helpers/API';
-import { Component } from 'react';
+import { useEffect, useState } from 'react';
 import { ImageGallery } from './ImageGallery';
 import { Modal } from './Modal';
 import { Searchbar } from './Searchbar';
 import css from './App.module.css';
 import { Button } from './Button';
 
-export class App extends Component {
-  state = {
-    imageName: '',
-    images: [],
-    page: 1,
-    largeImage: '',
-    isLoading: false,
-  };
+export const App = () => {
+  const [imageName, setImageName] = useState('');
+  const [images, setImages] = useState([]);
+  const [page, setPage] = useState(1);
+  const [largeImage, setlargeImage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  async componentDidUpdate(_, prevState) {
-    if (
-      this.state.imageName !== prevState.imageName ||
-      this.state.page !== prevState.page
-    ) {
-      this.setState({ isLoading: true });
+  useEffect(() => {
+    if (imageName === '') return;
 
-      const resultData = await searchImages(
-        this.state.imageName,
-        this.state.page
-      );
-      this.setState(prevState => ({
-        images: [...prevState.images, ...resultData.hits],
-        isLoading: false,
-      }));
+    setIsLoading(true);
+    async function getdata() {
+      try {
+        const { hits } = await searchImages(imageName, page);
+        setImages(prev => [...prev, ...hits]);
+        setIsLoading(false);
+      } catch (error) {
+        setError(error);
+        setIsLoading(false);
+        console.log(error.message);
+      }
     }
-  }
+    getdata();
+  }, [imageName, page]);
 
-  getLargeImage = event => {
-    this.setState({ largeImage: event.target.dataset.image });
+  const getLargeImage = event => {
+    setlargeImage(event.target.dataset.image);
   };
 
-  closeModal = event => {
+  const closeModal = event => {
     if (event?.target === event?.currentTarget || event.key === 'Escape') {
-      this.setState({ largeImage: '' });
+      setlargeImage('');
     }
   };
 
-  changePage = () => {
-    this.setState(prevState => ({
-      page: prevState.page + 1,
-    }));
+  const changePage = () => {
+    setPage(prev => prev + 1);
   };
 
-  saveDataToState = query => {
-    this.setState({ imageName: query, page: 1, images: [] });
+  const saveDataToState = query => {
+    setImageName(query);
+    setPage(1);
+    setImages([]);
   };
 
-  render() {
-    return (
-      <div className={css.App}>
-        <Searchbar
-          isLoading={this.state.isLoading}
-          saveDataToState={this.saveDataToState}
-        />
+  return (
+    <div className={css.App}>
+      <Searchbar isLoading={isLoading} saveDataToState={saveDataToState} />
 
-        <ImageGallery
-          getLargeImage={this.getLargeImage}
-          images={this.state.images}
-        />
-        {this.state.images.length !== 0 && (
-          <Button changePage={this.changePage} />
-        )}
-        {this.state.largeImage && (
-          <Modal closeModal={this.closeModal} src={this.state.largeImage} />
-        )}
-      </div>
-    );
-  }
-}
+      <ImageGallery getLargeImage={getLargeImage} images={images} />
+      {images.length !== 0 && <Button changePage={changePage} />}
+      {largeImage && <Modal closeModal={closeModal} src={largeImage} />}
+    </div>
+  );
+};
