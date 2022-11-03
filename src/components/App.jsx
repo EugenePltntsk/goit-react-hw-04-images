@@ -12,7 +12,7 @@ export const App = () => {
   const [page, setPage] = useState(1);
   const [largeImage, setlargeImage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [_, setError] = useState(null);
 
   useEffect(() => {
     if (imageName === '') return;
